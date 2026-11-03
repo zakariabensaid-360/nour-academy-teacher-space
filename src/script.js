@@ -292,6 +292,7 @@ function FiltersAdd() {
 }
 
 Recherche.addEventListener("input", FiltersAdd);
+
 FiltreGroupe.addEventListener("change", FiltersAdd);
 
 
