@@ -18,7 +18,13 @@ const CreateAlertList = (eleve) => {
 };
 
 
+groupes.forEach(group => {
+  const option =  document.createElement("option")
+  option.value = group.id
+  option.textContent = group.nom
 
+  FiltreGroupe.append(option)
+})
 
 const alerts = eleves.filter((eleve) => eleve.absences == 3);
 const alertsLists = alerts.map(CreateAlertList);
