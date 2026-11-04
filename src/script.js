@@ -31,9 +31,9 @@ AlertList.append(...alertsLists);
 
 
 
-function showingStudentsWithAlotAbs()  {
+function showingStudentsWithAlotAbs(Eleves)  {
 
-const alerts = eleves.filter((eleve) => eleve.absences == 3);
+const alerts = Eleves.filter((eleve) => eleve.absences == 3);
 
 const alertsLists = alerts.map(CreateAlertList);
 
@@ -90,7 +90,7 @@ studentsContainer.addEventListener("click", (event) => {
     studentcard.querySelector(".absence-count").textContent = "2 absent";
     console.log("test"); */
     Counter(eleves)
-    showingStudentsWithAlotAbs()
+    showingStudentsWithAlotAbs(eleves)
   }
 
   if (event.target.classList.contains("btn-note")) {
@@ -359,14 +359,16 @@ const FilterStudents = () => {
   const students = document
     .getElementsByClassName("students")[0]
     .querySelectorAll("li");
-
+let grp = eleves.filter(eleve => (GroupSelect === "" || eleve.groupeId === GroupSelect))
+Counter(grp)
+compteur.textContent =  grp.length + " students"
   students.forEach((li) => {
     let groupeId = li.dataset.groupeId;
     let StudentName = li.querySelector(".name").textContent;
+    console.log(GroupSelect, groupeId)
     if (
       (StudentName.trim().toLocaleLowerCase().includes(search) &&
-        GroupSelect === "") ||
-      GroupSelect === groupeId
+        (GroupSelect === "" || GroupSelect === groupeId))
     ) {
       li.classList.remove("hidden");
     } else {
@@ -410,7 +412,12 @@ Type.addEventListener("change", FilterStudents);
 
 compteur.textContent = eleves.length + " élèves";
 
-console.log(Array.from(listeEleves.children));
 
 
 Counter(eleves);
+
+
+
+function clalcuteTopAVG(Eleves) {
+  
+}
