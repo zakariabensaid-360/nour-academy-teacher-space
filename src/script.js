@@ -1,21 +1,24 @@
 import { groupes } from "./data";
+
 import { eleves } from "./data";
 
 const FiltreGroupe = document.getElementById("filtre-groupe");
+const Type = document.getElementById("tri");
 const Recherche = document.getElementById("recherche");
-
 const AllMoyenne = document.getElementById("bilan-moyenne");
 const AllAbsences = document.getElementById("bilan-absences");
 const AllAlerts = document.getElementById("bilan-alertes");
-
 const AlertList = document.getElementById("liste-parents");
+
 const CreateAlertList = (eleve) => {
   const li = document.createElement("li");
   li.classList = "rounded-xl bg-card px-3 py-2 ring-1 ring-line";
   li.textContent = eleve.telephoneParent + " / " + eleve.parentEmail;
-
   return li;
 };
+
+
+
 
 const alerts = eleves.filter((eleve) => eleve.absences == 3);
 const alertsLists = alerts.map(CreateAlertList);
@@ -47,25 +50,41 @@ studentsContainer.addEventListener("click", (event) => {
   const studentLi = event.target.closest("li");
   if (!studentLi) return;
 
+
   if (event.target.classList.contains("btn-absent")) {
     console.log("absent");
-    // console.log(studentLi.dataset.id)
+let studentId = studentLi.dataset.id
+    const eleve = eleves.find((e) => e.id === studentId);
+    eleve.absences += 1
+      const newLi = CreateList(eleve);
+
+  studentLi.replaceWith(newLi);
+    console.log("the eleve by find ",eleve)
+   
+    /*
+     console.log(studentLi.dataset.id)
     const studentcard = document.querySelector(
       `[data-id="${studentLi.dataset.id}"]`,
-    );
-
+    );*/
+/*
     console.log(studentcard.querySelector(".absence-count"));
     studentcard.querySelector(".absence-count").textContent = "2 absent";
-    console.log("test");
+    console.log("test"); */
   }
 
   if (event.target.classList.contains("btn-note")) {
-    const studentcard = document.querySelector(
-      `[data-id="${studentLi.dataset.id}"]`,
-    );
-    let test = studentcard.querySelector("input").value;
-    console.log(test);
-  }
+let studentId = studentLi.dataset.id
+    const eleve =  eleves.find(eleve => eleve.id === studentId)
+        let note = studentLi.querySelector("input").value;
+    if(!note) {
+      alert("you should add the npte first")
+      return
+    }
+    eleve.notes.push(Number(note))
+    let eleveli = CreateList(eleve)
+    studentLi.replaceWith(eleveli)
+
+  } 
 });
 
 const prenom = document.getElementById("prenom");
@@ -78,6 +97,7 @@ const telephoneMsg = document.getElementById("telephone-msg");
 const code = document.getElementById("code");
 const codeMsg = document.getElementById("code-msg");
 const submit = document.getElementById("submit");
+const group = document.getElementById("groupe")
 prenom.addEventListener("input", (e) => {
   if (isValidName(e.target.value)) {
     prenomMsg.classList = " mt-1 text-xs text-green-500";
@@ -107,12 +127,16 @@ nom.addEventListener("input", (e) => {
 email.addEventListener("input", (e) => {
   if (isValidEmail(e.target.value)) {
     emailMsg.classList = " mt-1 text-xs text-green-500";
+
     emailMsg.textContent = "Prénom valide.";
+
     email.classList =
       "mt-1 h-11 w-full rounded-xl border border-green-500  px-3";
   } else {
     email.classList = "mt-1 h-11 w-full rounded-xl border border-red-500  px-3";
+
     emailMsg.classList = "text-red-500  mt-1 text-xs text-muted";
+
     emailMsg.textContent = "not valide";
   }
 });
@@ -152,12 +176,26 @@ submit.addEventListener("click", (e) => {
     isValidPhone(telephone.value) &&
     isValidCode(code.value)
   ) {
+
+    const eleve = {
+    id: String(crypto.randomUUID()),
+    prenom: prenom.value,
+    nom: nom.value,
+    groupeId: group.value,
+    telephoneParent: telephone.value,
+    parentEmail: email.value,
+    absences: 0,
+    notes: []
+    }
+    eleves.push(eleve)
+    listeEleves.append(CreateList(eleve))
   } else {
     alert("you cannot submit this form untill all inputs are valid");
   }
 });
 
 const listeEleves = document.querySelector("#liste-eleves");
+
 const compteur = document.querySelector("#compteur");
 function CreateList(eleve) {
   const li = document.createElement("li");
@@ -176,24 +214,24 @@ function CreateList(eleve) {
   const inputNote = document.createElement("input");
   const btnNote = document.createElement("button");
   const P = document.createElement("p");
-
   const nomComplet = eleve.prenom + " " + eleve.nom;
   const absences = eleve.absences;
   const notes = eleve.notes || [];
-
   const PN = eleve.prenom[0] + eleve.nom[0];
 
   let avg = "—";
-
+console.log(eleve.notes)
   if (notes.length > 0) {
     const somme = notes.reduce((total, note) => total + note, 0);
+
     avg = (somme / notes.length).toFixed(1).replace(".", ",") + " / 20";
   }
   li.classList =
     absences !== 3
-      ? "rounded-2xl border border-line bg-card p-3"
-      : "alerte rounded-2xl border border-line bg-card p-3";
+      ? "rounded-2xl border border-line bg-card p-3 student"
+      : "alerte rounded-2xl border border-line bg-card p-3 student";
   li.dataset.id = eleve.id;
+  li.dataset.groupeId = eleve.groupeId;
   div.className = "flex flex-col gap-3 lg:flex-row lg:items-center";
   btn.className = "btn-fiche flex min-h-11 flex-1 items-center gap-3 text-left";
   btn.type = "button";
@@ -208,11 +246,11 @@ function CreateList(eleve) {
   WarnSpan.textContent = absences !== 3 ? "" : "Prévenir les parents";
   spanAvatar.textContent = PN.toLocaleUpperCase();
   infoSpan.classList = "min-w-0 flex-1";
-  nomSpan.classList = "block truncate font-medium";
+  nomSpan.classList = "name block truncate font-medium";
   nomSpan.textContent = nomComplet;
   absenceSpan.classList = "absence-count block text-sm text-muted";
   absenceSpan.textContent = absences + " absences";
-  AVGspan.classList = "font-serif text-xl";
+  AVGspan.classList = "avg font-serif text-xl";
   AVGspan.textContent = avg;
   divFooter.classList = "flex gap-2";
   btnAbsent.classList =
@@ -262,6 +300,7 @@ const Counter = () => {
 };
 
 Counter();
+
 const addStudent = (eleve) => {
   eleves.push(eleve);
   const newStudent = creerLigne(eleve);
@@ -271,6 +310,8 @@ const addStudent = (eleve) => {
 const addAbsence = () => {};
 
 const addNote = () => {};
+
+/*
 function FiltersAdd() {
     const search = Recherche.value.trim().toLowerCase();
     const GroupSelect = FiltreGroupe ? FiltreGroupe.value : "";
@@ -285,15 +326,75 @@ function FiltersAdd() {
     listeEleves.innerHTML = "";
     const listesFiltrees = elevesFiltres.map(CreateList);
     listeEleves.append(...listesFiltrees);
-
-    
-        compteur.textContent = elevesFiltres.length;
-    
+        compteur.textContent = elevesFiltres.length;    
 }
 
 Recherche.addEventListener("input", FiltersAdd);
-
 FiltreGroupe.addEventListener("change", FiltersAdd);
 
 
+
+*/
+
+const FilterStudents = () => {
+  const search = Recherche.value.trim().toLowerCase();
+  const GroupSelect = FiltreGroupe ? FiltreGroupe.value : "";
+  const students = document
+    .getElementsByClassName("students")[0]
+    .querySelectorAll("li");
+
+  students.forEach((li) => {
+    let groupeId = li.dataset.groupeId;
+    let StudentName = li.querySelector(".name").textContent;
+    if (
+      (StudentName.trim().toLocaleLowerCase().includes(search) &&
+        GroupSelect === "") ||
+      GroupSelect === groupeId
+    ) {
+      li.classList.remove("hidden");
+    } else {
+      li.classList.add("hidden");
+    }
+  });
+
+  const OrderByType = (type) => {
+    if (type == "nom") {
+      const items = Array.from(listeEleves.children);
+      items.sort((a, b) => a.textContent.localeCompare(b.textContent));
+      listeEleves.replaceChildren(...items);
+    } else if (type == "moyenne") {
+      console.log("here");
+      const items = Array.from(listeEleves.children);
+
+      items.sort((a, b) => {
+        const valA = Number.parseFloat(
+          a.querySelector(".avg").textContent.split("/")[0],
+        );
+        const valB = Number.parseFloat(
+          b.querySelector(".avg") !== null
+            ? b.querySelector(".avg").textContent.split("/")[0]
+            : 0,
+        );
+
+        return valB - valA;
+      });
+    }
+  };
+  
+  OrderByType(Type.value);
+
+};
+
+Recherche.addEventListener("input", FilterStudents);
+
+FiltreGroupe.addEventListener("change", FilterStudents);
+
+Type.addEventListener("change", FilterStudents);
+
 compteur.textContent = eleves.length + " élèves";
+
+console.log(Array.from(listeEleves.children));
+
+/*
+
+*/
