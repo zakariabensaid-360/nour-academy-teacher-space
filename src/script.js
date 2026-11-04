@@ -1,5 +1,4 @@
 import { groupes } from "./data";
-
 import { eleves } from "./data";
 
 const FiltreGroupe = document.getElementById("filtre-groupe");
@@ -11,24 +10,39 @@ const AllAlerts = document.getElementById("bilan-alertes");
 const AlertList = document.getElementById("liste-parents");
 
 const CreateAlertList = (eleve) => {
-  const li = document.createElement("li");
+  const li = document.createElement("li")
   li.classList = "rounded-xl bg-card px-3 py-2 ring-1 ring-line";
   li.textContent = eleve.telephoneParent + " / " + eleve.parentEmail;
   return li;
 };
 
 
-groupes.forEach(group => {
-  const option =  document.createElement("option")
-  option.value = group.id
-  option.textContent = group.nom
+groupes.forEach((group) => {
+  const option = document.createElement("option");
+  option.value = group.id;
+  option.textContent = group.nom;
+  FiltreGroupe.append(option);
+});
 
-  FiltreGroupe.append(option)
-})
 
 const alerts = eleves.filter((eleve) => eleve.absences == 3);
 const alertsLists = alerts.map(CreateAlertList);
 AlertList.append(...alertsLists);
+
+
+
+function showingStudentsWithAlotAbs()  {
+
+const alerts = eleves.filter((eleve) => eleve.absences == 3);
+
+const alertsLists = alerts.map(CreateAlertList);
+
+AlertList.replaceChildren()
+
+AlertList.append(...alertsLists);
+}
+
+
 
 function isValidName(name) {
   const nameRegex = /^[a-zA-ZÀ-ÿ\s-]{2,}$/;
@@ -55,43 +69,46 @@ const studentsContainer = document.getElementById("liste-eleves");
 studentsContainer.addEventListener("click", (event) => {
   const studentLi = event.target.closest("li");
   if (!studentLi) return;
-
-
   if (event.target.classList.contains("btn-absent")) {
     console.log("absent");
-let studentId = studentLi.dataset.id
+    let studentId = studentLi.dataset.id;
     const eleve = eleves.find((e) => e.id === studentId);
-    eleve.absences += 1
-      const newLi = CreateList(eleve);
+    eleve.absences += 1;
+    const newLi = CreateList(eleve);
 
-  studentLi.replaceWith(newLi);
-    console.log("the eleve by find ",eleve)
-   
+    studentLi.replaceWith(newLi);
+    console.log("the eleve by find ", eleve);
+
+
     /*
      console.log(studentLi.dataset.id)
     const studentcard = document.querySelector(
       `[data-id="${studentLi.dataset.id}"]`,
     );*/
-/*
+    /*
     console.log(studentcard.querySelector(".absence-count"));
     studentcard.querySelector(".absence-count").textContent = "2 absent";
     console.log("test"); */
+    Counter(eleves)
+    showingStudentsWithAlotAbs()
   }
 
   if (event.target.classList.contains("btn-note")) {
-let studentId = studentLi.dataset.id
-    const eleve =  eleves.find(eleve => eleve.id === studentId)
-        let note = studentLi.querySelector("input").value;
-    if(!note) {
-      alert("you should add the npte first")
-      return
+    let studentId = studentLi.dataset.id;
+    const eleve = eleves.find((eleve) => eleve.id === studentId);
+    let note = studentLi.querySelector("input").value;
+    if (!note) {
+      alert("you should add the npte first");
+      return;
     }
-    eleve.notes.push(Number(note))
-    let eleveli = CreateList(eleve)
-    studentLi.replaceWith(eleveli)
-
-  } 
+    eleve.notes.push(Number(note));
+    let eleveli = CreateList(eleve);
+    studentLi.replaceWith(eleveli);
+  }
 });
+
+
+
 
 const prenom = document.getElementById("prenom");
 const prenomMsg = document.getElementById("prenom-msg");
@@ -103,7 +120,8 @@ const telephoneMsg = document.getElementById("telephone-msg");
 const code = document.getElementById("code");
 const codeMsg = document.getElementById("code-msg");
 const submit = document.getElementById("submit");
-const group = document.getElementById("groupe")
+const group = document.getElementById("groupe");
+
 prenom.addEventListener("input", (e) => {
   if (isValidName(e.target.value)) {
     prenomMsg.classList = " mt-1 text-xs text-green-500";
@@ -117,7 +135,6 @@ prenom.addEventListener("input", (e) => {
     prenomMsg.textContent = "not valide";
   }
 });
-
 nom.addEventListener("input", (e) => {
   if (isValidName(e.target.value)) {
     nomMsg.classList = " mt-1 text-xs text-green-500";
@@ -139,11 +156,11 @@ email.addEventListener("input", (e) => {
     email.classList =
       "mt-1 h-11 w-full rounded-xl border border-green-500  px-3";
   } else {
+
     email.classList = "mt-1 h-11 w-full rounded-xl border border-red-500  px-3";
-
-    emailMsg.classList = "text-red-500  mt-1 text-xs text-muted";
-
+    emailMsg.classList = "text-red-500  mt-1 text-xs text-muted"
     emailMsg.textContent = "not valide";
+
   }
 });
 
@@ -160,6 +177,8 @@ code.addEventListener("input", (e) => {
   }
 });
 
+
+
 telephone.addEventListener("input", (e) => {
   if (isValidPhone(e.target.value)) {
     telephoneMsg.classList = " mt-1 text-xs text-green-500";
@@ -167,8 +186,7 @@ telephone.addEventListener("input", (e) => {
     telephone.classList =
       "mt-1 h-11 w-full rounded-xl border border-green-500  px-3";
   } else {
-    telephone.classList =
-      "mt-1 h-11 w-full rounded-xl border border-red-500  px-3";
+    telephone.classList = "mt-1 h-11 w-full rounded-xl border border-red-500  px-3";
     telephoneMsg.classList = "text-red-500  mt-1 text-xs text-muted";
     telephoneMsg.textContent = "not valide";
   }
@@ -182,22 +200,24 @@ submit.addEventListener("click", (e) => {
     isValidPhone(telephone.value) &&
     isValidCode(code.value)
   ) {
-
     const eleve = {
-    id: String(crypto.randomUUID()),
-    prenom: prenom.value,
-    nom: nom.value,
-    groupeId: group.value,
-    telephoneParent: telephone.value,
-    parentEmail: email.value,
-    absences: 0,
-    notes: []
-    }
-    eleves.push(eleve)
-    listeEleves.append(CreateList(eleve))
+      id: String(crypto.randomUUID()),
+      prenom: prenom.value,
+      nom: nom.value,
+      groupeId: group.value,
+      telephoneParent: telephone.value,
+      parentEmail: email.value,
+      absences: 0,
+      notes: [],
+    };
+
+    eleves.push(eleve);
+    listeEleves.append(CreateList(eleve));
+    Counter(eleves)
   } else {
     alert("you cannot submit this form untill all inputs are valid");
   }
+
 });
 
 const listeEleves = document.querySelector("#liste-eleves");
@@ -226,7 +246,7 @@ function CreateList(eleve) {
   const PN = eleve.prenom[0] + eleve.nom[0];
 
   let avg = "—";
-console.log(eleve.notes)
+  console.log(eleve.notes);
   if (notes.length > 0) {
     const somme = notes.reduce((total, note) => total + note, 0);
 
@@ -295,51 +315,42 @@ const Lists = eleves.map(CreateList);
 
 listeEleves.append(...Lists);
 
-const Counter = () => {
+const Counter = (Eleves) => {
+  console.log("test")
   AllMoyenne.textContent = 5;
-
-  AllAbsences.textContent = eleves.reduce((acc, el) => acc + el.absences, 0);
-  AllAlerts.textContent = eleves.reduce(
+  AllAbsences.textContent = Eleves.reduce((acc, el) => acc + el.absences, 0);
+  AllAlerts.textContent = Eleves.reduce(
     (acc, el) => (el.absences == 3 ? acc + 1 : acc + 0),
     0,
   );
 };
 
-Counter();
-
 const addStudent = (eleve) => {
   eleves.push(eleve);
   const newStudent = creerLigne(eleve);
   listeEleves.append(newStudent);
+  Counter(eleves);
 };
-
 const addAbsence = () => {};
-
 const addNote = () => {};
 
 /*
 function FiltersAdd() {
     const search = Recherche.value.trim().toLowerCase();
     const GroupSelect = FiltreGroupe ? FiltreGroupe.value : "";
-
     const elevesFiltres = eleves.filter((eleve) => {
         const nomComplet = `${eleve.prenom} ${eleve.nom}`.toLowerCase();
         const matchsearch = nomComplet.includes(search);
         const matchgroup = GroupSelect === "" || eleve.groupeId === GroupSelect;
         return matchsearch && matchgroup;
     });
-
     listeEleves.innerHTML = "";
     const listesFiltrees = elevesFiltres.map(CreateList);
     listeEleves.append(...listesFiltrees);
         compteur.textContent = elevesFiltres.length;    
 }
-
 Recherche.addEventListener("input", FiltersAdd);
 FiltreGroupe.addEventListener("change", FiltersAdd);
-
-
-
 */
 
 const FilterStudents = () => {
@@ -366,6 +377,7 @@ const FilterStudents = () => {
   const OrderByType = (type) => {
     if (type == "nom") {
       const items = Array.from(listeEleves.children);
+
       items.sort((a, b) => a.textContent.localeCompare(b.textContent));
       listeEleves.replaceChildren(...items);
     } else if (type == "moyenne") {
@@ -386,9 +398,8 @@ const FilterStudents = () => {
       });
     }
   };
-  
-  OrderByType(Type.value);
 
+  OrderByType(Type.value);
 };
 
 Recherche.addEventListener("input", FilterStudents);
@@ -401,6 +412,5 @@ compteur.textContent = eleves.length + " élèves";
 
 console.log(Array.from(listeEleves.children));
 
-/*
 
-*/
+Counter(eleves);
