@@ -8,6 +8,11 @@ const AllMoyenne = document.getElementById("bilan-moyenne");
 const AllAbsences = document.getElementById("bilan-absences");
 const AllAlerts = document.getElementById("bilan-alertes");
 const AlertList = document.getElementById("liste-parents");
+const GroupSelect = document.getElementById("groupe")
+
+
+
+
 
 const CreateAlertList = (eleve) => {
   const li = document.createElement("li")
@@ -19,9 +24,21 @@ const CreateAlertList = (eleve) => {
 
 groupes.forEach((group) => {
   const option = document.createElement("option");
+
   option.value = group.id;
   option.textContent = group.nom;
+  
+  
+
+  
+  const option1 = document.createElement("option");
+
+  option1.value = group.id;
+  option1.textContent = group.nom;
+  GroupSelect.append(option1);
   FiltreGroupe.append(option);
+  
+ 
 });
 
 
@@ -204,13 +221,18 @@ submit.addEventListener("click", (e) => {
       id: String(crypto.randomUUID()),
       prenom: prenom.value,
       nom: nom.value,
-      groupeId: group.value,
+      groupeId: GroupSelect.value,
       telephoneParent: telephone.value,
       parentEmail: email.value,
       absences: 0,
       notes: [],
     };
-
+    eleves.forEach(eleve => {
+      if(eleve.nom === nom.value) {
+        alert("you cannot add same student twice")
+        return;
+      }
+    })
     eleves.push(eleve);
     listeEleves.append(CreateList(eleve));
     Counter(eleves)
@@ -361,6 +383,7 @@ const FilterStudents = () => {
     .querySelectorAll("li");
 let grp = eleves.filter(eleve => (GroupSelect === "" || eleve.groupeId === GroupSelect))
 Counter(grp)
+CalculateTOPAVG(grp)
 compteur.textContent =  grp.length + " students"
   students.forEach((li) => {
     let groupeId = li.dataset.groupeId;
@@ -418,6 +441,31 @@ Counter(eleves);
 
 
 
-function clalcuteTopAVG(Eleves) {
-  
-}
+
+
+
+
+
+const CalculateTOPAVG = (eleves) => {
+  const BilanMeilleur = document.getElementById("bilan-meilleur")
+  let allSumAVG = 0;
+
+  eleves.forEach(el => {
+    if (!el.notes || el.notes.length === 0) return;
+
+    let studentAvg = 0;
+    el.notes.forEach(note => {
+      studentAvg += note;
+    });
+
+    studentAvg = Math.round(studentAvg / el.notes.length);
+    allSumAVG += studentAvg;
+  });
+
+  let groupAVG = (allSumAVG / eleves.length).toFixed(2); 
+BilanMeilleur.textContent =  groupAVG 
+
+};
+
+
+CalculateTOPAVG(eleves);
