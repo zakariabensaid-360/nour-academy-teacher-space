@@ -8,32 +8,53 @@ const AllMoyenne = document.getElementById("bilan-moyenne");
 const AllAbsences = document.getElementById("bilan-absences");
 const AllAlerts = document.getElementById("bilan-alertes");
 const AlertList = document.getElementById("liste-parents");
+const GroupSelect = document.getElementById("groupe")
+
+
+
+
 
 const CreateAlertList = (eleve) => {
   const li = document.createElement("li")
   li.classList = "rounded-xl bg-card px-3 py-2 ring-1 ring-line";
-  li.textContent = eleve.telephoneParent + " / " + eleve.parentEmail;
+  li.textContent = eleve.telephoneParent + " / " + eleve.parentEmail +  "/" + eleve.absences;
   return li;
 };
 
 
 groupes.forEach((group) => {
   const option = document.createElement("option");
+
   option.value = group.id;
   option.textContent = group.nom;
+  
+  
+
+
+  const option1 = document.createElement("option");
+
+  option1.value = group.id;
+  option1.textContent = group.nom;
+  GroupSelect.append(option1);
   FiltreGroupe.append(option);
+  
+ 
 });
 
 
-const alerts = eleves.filter((eleve) => eleve.absences == 3);
+const alertsCheck  =  () => {
+  const alerts = eleves.filter((eleve) => eleve.absences >= 3).sort((a, b) => b.absences - a.absences)
 const alertsLists = alerts.map(CreateAlertList);
+AlertList.replaceChildren()
 AlertList.append(...alertsLists);
 
+}
+alertsCheck()
 
 
 function showingStudentsWithAlotAbs(Eleves)  {
 
-const alerts = Eleves.filter((eleve) => eleve.absences == 3);
+const alerts = Eleves.filter((eleve) => eleve.absences >= 3);
 
 const alertsLists = alerts.map(CreateAlertList);
 
@@ -78,6 +99,7 @@ studentsContainer.addEventListener("click", (event) => {
 
     studentLi.replaceWith(newLi);
     console.log("the eleve by find ", eleve);
+    
 
 
     /*
@@ -91,6 +113,7 @@ studentsContainer.addEventListener("click", (event) => {
     console.log("test"); */
     Counter(eleves)
     showingStudentsWithAlotAbs(eleves)
+    alertsCheck()
   }
 
   if (event.target.classList.contains("btn-note")) {
@@ -204,13 +227,18 @@ submit.addEventListener("click", (e) => {
       id: String(crypto.randomUUID()),
       prenom: prenom.value,
       nom: nom.value,
-      groupeId: group.value,
+      groupeId: GroupSelect.value,
       telephoneParent: telephone.value,
       parentEmail: email.value,
       absences: 0,
       notes: [],
     };
-
+    eleves.forEach(eleve => {
+      if(eleve.nom === nom.value) {
+        alert("you cannot add same student twice")
+        return;
+      }
+    })
     eleves.push(eleve);
     listeEleves.append(CreateList(eleve));
     Counter(eleves)
@@ -252,24 +280,24 @@ function CreateList(eleve) {
 
     avg = (somme / notes.length).toFixed(1).replace(".", ",") + " / 20";
   }
-  li.classList =
-    absences !== 3
-      ? "rounded-2xl border border-line bg-card p-3 student"
-      : "alerte rounded-2xl border border-line bg-card p-3 student";
+li.classList =
+  absences < 3
+    ? "rounded-2xl border border-line bg-card p-3 student"
+    : "alerte rounded-2xl border border-line bg-card p-3 student";
   li.dataset.id = eleve.id;
   li.dataset.groupeId = eleve.groupeId;
   div.className = "flex flex-col gap-3 lg:flex-row lg:items-center";
   btn.className = "btn-fiche flex min-h-11 flex-1 items-center gap-3 text-left";
   btn.type = "button";
-  spanAvatar.classList =
-    absences !== 3
-      ? "grid size-10 shrink-0 place-items-center rounded-full bg-brand-soft text-sm font-semibold text-brand"
-      : "grid size-10 shrink-0 place-items-center rounded-full bg-alert text-sm font-semibold text-white";
-  WarnSpan.classList =
-    absences !== 3
-      ? ""
-      : "badge ml-1 whitespace-nowrap rounded-full bg-alert px-2 py-0.5 text-xs font-medium text-white";
-  WarnSpan.textContent = absences !== 3 ? "" : "Prévenir les parents";
+spanAvatar.classList =
+  absences < 3
+    ? "grid size-10 shrink-0 place-items-center rounded-full bg-brand-soft text-sm font-semibold text-brand"
+    : "grid size-10 shrink-0 place-items-center rounded-full bg-alert text-sm font-semibold text-white";
+WarnSpan.classList =
+  absences < 3
+    ? ""
+    : "badge ml-1 whitespace-nowrap rounded-full bg-alert px-2 py-0.5 text-xs font-medium text-white";
+WarnSpan.textContent = absences < 3 ? "" : "Prévenir les parents";
   spanAvatar.textContent = PN.toLocaleUpperCase();
   infoSpan.classList = "min-w-0 flex-1";
   nomSpan.classList = "name block truncate font-medium";
@@ -319,10 +347,10 @@ const Counter = (Eleves) => {
   console.log("test")
   AllMoyenne.textContent = 5;
   AllAbsences.textContent = Eleves.reduce((acc, el) => acc + el.absences, 0);
-  AllAlerts.textContent = Eleves.reduce(
-    (acc, el) => (el.absences == 3 ? acc + 1 : acc + 0),
-    0,
-  );
+AllAlerts.textContent = Eleves.reduce(
+  (acc, el) => (el.absences >= 3 ? acc + 1 : acc),
+  0,
+);
 };
 
 const addStudent = (eleve) => {
@@ -361,6 +389,7 @@ const FilterStudents = () => {
     .querySelectorAll("li");
 let grp = eleves.filter(eleve => (GroupSelect === "" || eleve.groupeId === GroupSelect))
 Counter(grp)
+CalculateTOPAVG(grp)
 compteur.textContent =  grp.length + " students"
   students.forEach((li) => {
     let groupeId = li.dataset.groupeId;
@@ -418,6 +447,31 @@ Counter(eleves);
 
 
 
-function clalcuteTopAVG(Eleves) {
-  
-}
+
+
+
+
+
+const CalculateTOPAVG = (eleves) => {
+  const BilanMeilleur = document.getElementById("bilan-meilleur")
+  let allSumAVG = 0;
+
+  eleves.forEach(el => {
+    if (!el.notes || el.notes.length === 0) return;
+
+    let studentAvg = 0;
+    el.notes.forEach(note => {
+      studentAvg += note;
+    });
+
+    studentAvg = Math.round(studentAvg / el.notes.length);
+    allSumAVG += studentAvg;
+  });
+
+  let groupAVG = (allSumAVG / eleves.length).toFixed(2); 
+BilanMeilleur.textContent =  groupAVG 
+
+};
+
+
+CalculateTOPAVG(eleves);
