@@ -30,7 +30,7 @@ groupes.forEach((group) => {
   
   
 
-  
+
   const option1 = document.createElement("option");
 
   option1.value = group.id;
